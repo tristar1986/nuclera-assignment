@@ -1,0 +1,23 @@
+{
+  "name": "nuclera-assignment",
+  "version": "1.0.0",
+  "description": "Nulcera Application tehcnical assignment",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tristar1986/nuclera-assignment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tristar1986/nuclera-assignment/issues"
+  },
+  "homepage": "https://github.com/tristar1986/nuclera-assignment#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.5.2"
+  }
+}
