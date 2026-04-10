@@ -37,7 +37,7 @@ export class LoginPage extends BasePage {
     }
 
     async signIn(username: string, password: string) {
-        console.log(`Signing in with username: ${username} and password: ${password}`);
+        console.log(`Signing in with username: ${username}`);
         await this.usernameInput.fill(username);
         await this.passwordInput.fill(password);
         await this.signInButton.click();

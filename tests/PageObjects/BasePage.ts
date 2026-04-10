@@ -10,6 +10,11 @@ export class BasePage {
     projectsLink: Locator;
     synchroniseLink: Locator;
 
+    // Timeouts for modal/toasts visibility
+    modalHiddenTimeout: number = 2000;
+    toastHiddenTimeout: number = 6000;
+    toastVisibleTimeout: number = 1000;
+
     constructor(page: Page, hasNavigationBar: boolean = true) {
         this.page = page;
         this.hasNavigationBar = hasNavigationBar;

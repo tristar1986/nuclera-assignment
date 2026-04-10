@@ -29,6 +29,10 @@
     1. What happens if user is in an existing session, auth timeout? Probably not worth auto test.
 1. Delete admin user **
 1. Should not be able to delete yourself **
+1. Test toasts
+
+    1. Dissapear when cancelled
+    1. Dissapear after timeout
 
 ## Projects page
 ### Filter projects
