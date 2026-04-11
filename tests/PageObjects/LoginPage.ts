@@ -1,6 +1,7 @@
 import { BasePage } from "./BasePage";
 import { expect, Locator, Page } from '@playwright/test';
 import { ProjectsPage } from "./ProjectsPage";
+import { User } from "../DataObjects/User";
 
 export class LoginPage extends BasePage {
     usernameLabel: Locator;
@@ -14,7 +15,7 @@ export class LoginPage extends BasePage {
     headingLoc: Locator;
 
     constructor(page: Page) {
-        super(page, false);
+        super(page, undefined, false);
         this.page.getByLabel("Username")
         this.usernameInput = this.page.getByTestId('login-username');
 
@@ -36,11 +37,13 @@ export class LoginPage extends BasePage {
         return this;
     }
 
-    async signIn(username: string, password: string) {
-        console.log(`Signing in with username: ${username}`);
-        await this.usernameInput.fill(username);
-        await this.passwordInput.fill(password);
+    async signIn(user: User) {
+        console.log(`Signing in with username: ${user.username}`);
+        await this.usernameInput.fill(user.username);
+        await this.passwordInput.fill(user.password);
         await this.signInButton.click();
-        return new ProjectsPage(this.page);
+        let projectsPage = new ProjectsPage(this.page, user);
+        await projectsPage.locatorsAreVisible();
+        return projectsPage;
     }
 }

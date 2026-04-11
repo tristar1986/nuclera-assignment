@@ -23,6 +23,6 @@
     "dotenv": "^17.4.1"
   },
   "dependencies": {
-    
+    "date-fns": "^4.1.0"
   }
 }

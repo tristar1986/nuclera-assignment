@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from './PageObjects/LoginPage';
-import { generate_random_string, expectFailLogin, expectSuccessfulLogin, gotoUsersPage, loginAsAdmin, gotoProjectsPage, logout } from './helpers';
+import { generate_random_string, expectFailLogin, expectSuccessfulLogin, gotoUsersPage, loginAsAdmin, gotoProjectsPage, logout, originalAdminUser } from './helpers';
 import { User, UserRole } from './DataObjects/User';
 
 test.describe("Login Page Tests", () => {
@@ -17,7 +17,8 @@ test.describe("Login Page Tests", () => {
     });
 
     test("incorrect simple password does not login", async ({ page }) => {
-        await expectFailLogin(page, generate_random_string(10));
+        let adminUser = new User(originalAdminUser.username, generate_random_string(), UserRole.Admin);
+        await expectFailLogin(page, adminUser);
     });
 
     test("regular user can login successfully", async ({ page }) => {
@@ -37,6 +38,12 @@ test.describe("Login Page Tests", () => {
 
     test("root page redirects to login when not authenticated", async ({ page }) => {
         await page.goto('/');
+        let loginPage = new LoginPage(page);
+        await loginPage.locatorsAreVisible();
+    });
+
+    test("project page redirects to login when not authenticated", async ({ page }) => {
+        await page.goto('/projects');
         let loginPage = new LoginPage(page);
         await loginPage.locatorsAreVisible();
     });
@@ -69,6 +76,6 @@ test.describe("Login Page Tests", () => {
         await usersPage.deleteUser(newUser);
         
         await logout(projectPage);
-        await expectFailLogin(page, newUser.password);
+        await expectFailLogin(page, newUser);
     });
 });

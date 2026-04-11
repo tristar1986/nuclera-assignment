@@ -1,4 +1,4 @@
-import {Page} from "@playwright/test";
+import {expect, Page} from "@playwright/test";
 import { LoginPage } from "./PageObjects/LoginPage";
 import { UsersPage, NewUserModal } from "./PageObjects/UsersPage";
 import { BasePage } from "./PageObjects/BasePage";
@@ -9,7 +9,7 @@ if (!process.env.ADMIN_PASSWORD) {
     throw new Error("ADMIN_PASSWORD environment variable is not set");
 }
 export const adminPassword = process.env.ADMIN_PASSWORD;
-export const adminUser = new User("admin", adminPassword, UserRole.Admin);
+export const originalAdminUser = new User("admin", adminPassword, UserRole.Admin);
 
 export function generate_random_string(length: number = 10): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -24,11 +24,11 @@ export function generate_random_string(length: number = 10): string {
 export async function login(page: Page, user: User) {
     let loginPage = await (new LoginPage(page)).goto();
     await loginPage.locatorsAreVisible();
-    return await loginPage.signIn(user.username, user.password);
+    return await loginPage.signIn(user);
 }
 
 export async function loginAsAdmin(page: Page) {
-    return await login(page, adminUser);
+    return await login(page, originalAdminUser);
 }
 
 export async function gotoUsersPage(basePage: BasePage) {
@@ -51,10 +51,10 @@ export async function loginAsAdminAndCreateUser(page: Page, user: User) {
     return usersPage;
 }
 
-export async function expectFailLogin(page: Page, password: string) {
+export async function expectFailLogin(page: Page, user: User) {
     let loginPage = new LoginPage(page);
     await loginPage.goto();
-    await loginPage.signIn("admin", password);
+    await expect(loginPage.signIn(user)).rejects.toThrow();
     
     // TODO: There is an error message that appears very briefly but dissapears which could make the test flaky if we checked for it.
     // Ensure we are still on the login page
@@ -67,11 +67,11 @@ export async function expectSuccessfulLogin(page: Page, user: User) {
     let usersPage = await loginAsAdminAndCreateUser(page, user);
     let loginPage = await (await gotoProjectsPage(usersPage)).logout();
 
-    let projectPage = await loginPage.signIn(user.username, user.password);
+    let projectPage = await loginPage.signIn(user);
     await projectPage.locatorsAreVisible();
 }
 
 export async function logout(basePage: BasePage) {
     let projectPage = await gotoProjectsPage(basePage)
-    projectPage.logout()
+    await projectPage.logout()
 }

@@ -50,41 +50,42 @@ test.describe("Users Page Tests", () => {
     test("username field is mandatory when creating user", async ({ page }) => {
         await usersPage.createUser(newUser);
         usersPage.newUserButton.click();
-        const modal = new NewUserModal(page);
-        await modal.locatorsAreVisible();
-        await modal.passwordInput.fill(generate_random_string());
-        await expect(modal.usernameInput).toHaveAttribute("required");
-        await modal.createButton.click();
-        await modal.locatorsAreVisible();
+        const newUserModal = new NewUserModal(page);
+        await newUserModal.locatorsAreVisible();
+        await newUserModal.passwordInput.fill(generate_random_string());
+        await expect(newUserModal.usernameInput).toHaveAttribute("required");
+        await newUserModal.createButton.click();
+        await newUserModal.locatorsAreVisible();
     });
 
     test("password field is mandatory when creating user", async ({ page }) => {
         await usersPage.newUserButton.click();
-        const modal = new NewUserModal(page);
-        await modal.locatorsAreVisible();
-        await modal.usernameInput.fill(generate_random_string());
-        await expect(modal.passwordInput).toHaveAttribute("required");
-        await modal.createButton.click();
-        await modal.locatorsAreVisible();
+        const newUserModal = new NewUserModal(page);
+        await newUserModal.locatorsAreVisible();
+        await newUserModal.usernameInput.fill(generate_random_string());
+        await expect(newUserModal.passwordInput).toHaveAttribute("required");
+        await newUserModal.createButton.click();
+        await newUserModal.locatorsAreVisible();
     });
 
     test("cancel creating user", async ({ page }) => {
         await usersPage.newUserButton.click();
-        const modal = new NewUserModal(page);
-        await modal.locatorsAreVisible();
-        modal.fillForm(newUser);
-        await modal.cancelButton.click();
-        await modal.modal.waitFor({ state: 'hidden', timeout: modal.modalHiddenTimeout });
+        const newUserModal = new NewUserModal(page);
+        await newUserModal.locatorsAreVisible();
+        await newUserModal.fillForm(newUser);
+        await newUserModal.cancelButton.click();
+        await newUserModal.modal.waitFor({ state: 'hidden', timeout: newUserModal.modalHiddenTimeout });
         await usersPage.locatorsAreVisible();
         await expect(usersPage.userTable.getByTestId('user-username').filter({ hasText: newUser.username })).toHaveCount(0);
     });
 
     test("unfocus create user modal cancel creation", async ({ page }) => {
         await usersPage.newUserButton.click();
-        const modal = new NewUserModal(page);
-        await modal.locatorsAreVisible();
-        await modal.fillForm(newUser);
+        const newUserModal = new NewUserModal(page);
+        await newUserModal.locatorsAreVisible();
+        await newUserModal.fillForm(newUser);
         await page.mouse.click(0, 0);
+        await newUserModal.modal.waitFor({ state: 'hidden', timeout: newUserModal.modalHiddenTimeout });
         await usersPage.locatorsAreVisible();
         await expect(usersPage.userTable.getByTestId('user-username').filter({ hasText: newUser.username })).toHaveCount(0);
     });

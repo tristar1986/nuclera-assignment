@@ -6,7 +6,6 @@ export class UsersPage extends BasePage {
     newUserButton: Locator;
     heading: Locator;
     userTable: Locator;
-    toast: Locator;
 
     constructor(page: Page) {
         super(page);
@@ -14,7 +13,6 @@ export class UsersPage extends BasePage {
         this.heading = this.page.getByRole('heading', { name: 'Users' });
         
         this.userTable = this.page.getByTestId('users-list').getByRole('table');
-        this.toast = this.page.getByTestId('toast');
         this.visibleLocators = [this.heading, this.newUserButton, this.userTable];
     }
 
@@ -29,11 +27,11 @@ export class UsersPage extends BasePage {
         await this.locatorsAreVisible();
         await this.toast.waitFor({ state: 'visible', timeout: this.toastVisibleTimeout });
         await expect(this.toast).toContainText(`"${user.username}" created`);
+        await expect(this.userTable.getByRole('columnheader')).toHaveText(['Username', 'Role', 'Actions']); // ensure after a user is created the table appears with headers.
     }
 
     async locatorsAreVisible() {
         await super.locatorsAreVisible();
-        await expect(this.userTable.getByRole('columnheader')).toHaveText(['Username', 'Role', 'Actions']);
     }
 
     async getUsers() {
@@ -97,34 +95,35 @@ export class NewUserModal extends BasePage {
     createButton: Locator;
     cancelButton: Locator;
     roleLabel: Locator;
-    roleInput: Locator;
+    roleSelect: Locator;
     errorMessage: Locator;
 
     constructor(page: Page) {
-        super(page, false);
+        super(page, undefined, false);
         this.modal = this.page.getByTestId('user-modal');
         this.usernameLabel = this.modal.getByLabel("Username");
         this.usernameInput = this.modal.getByTestId('user-modal-username');
         this.passwordLabel = this.modal.getByLabel("Password");
         this.passwordInput = this.modal.getByTestId('user-modal-password');
         this.roleLabel = this.modal.getByLabel("Role");
-        this.roleInput = this.modal.getByRole('combobox', { name: 'Role' });
+        this.roleSelect = this.modal.getByRole('combobox', { name: 'Role' });
         this.createButton = this.modal.getByRole('button', { name: 'Create' });
         this.cancelButton = this.modal.getByRole('button', { name: 'Cancel' });
         this.errorMessage = this.modal.getByTestId('user-modal-error');
-        this.visibleLocators = [this.modal, this.usernameLabel, this.usernameInput, this.passwordLabel, this.passwordInput, this.roleLabel, this.roleInput, this.createButton, this.cancelButton];
+        this.visibleLocators = [this.modal, this.usernameLabel, this.usernameInput, this.passwordLabel, this.passwordInput, this.roleLabel, this.roleSelect, this.createButton, this.cancelButton];
     }
 
     async fillForm(user: User) {
         await this.usernameInput.fill(user.username);
         await this.passwordInput.fill(user.password);
-        await this.roleInput.selectOption(user.role);
+        await this.roleSelect.selectOption(user.role);
     }
 
     async locatorsAreVisible() {
         await super.locatorsAreVisible();
-        await this.roleInput.selectOption(UserRole.Regular);
-        await this.roleInput.selectOption(UserRole.Admin);
+        for (const role of Object.values(UserRole)) {
+            await this.roleSelect.selectOption(role);
+        }
     }
 }
 
@@ -136,7 +135,7 @@ export class DeleteUserModal extends BasePage {
     user: User;
     
     constructor(page: Page, user: User) {
-        super(page, false);
+        super(page, undefined, false);
         this.user = user;   
 
         // Using xpath here as there is no unique identifier
