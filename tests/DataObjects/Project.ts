@@ -22,17 +22,6 @@ export class Project {
             this.itemCount = this.items.length;
         }
     }
-
-    isEqualTo(other: Project, fromProjectPage: boolean = false): boolean {
-        if (this.name !== other.name) return false;
-        if (this.status !== other.status) return false;
-        if (this.itemCount !== other.itemCount) return false;
-        if (this.createdAt.getTime() !== other.createdAt.getTime()) return false;
-        if (!fromProjectPage) { // If we comparing project objects from the project page then we can't compare certain fields as they are not present.
-            if (this.description !== other.description) return false;
-        }
-        return true;
-    }
 }
 
 export enum ProjectStatus {

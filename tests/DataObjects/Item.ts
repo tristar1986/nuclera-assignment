@@ -3,9 +3,9 @@ export class Item {
     description: string;
     status: ItemStatus;
 
-    constructor(name: string, description: string, status: ItemStatus) {
+    constructor(name: string, status: ItemStatus, description?: string) {
         this.name = name;
-        this.description = description;
+        this.description = description || "";
         this.status = status;
     }
 }

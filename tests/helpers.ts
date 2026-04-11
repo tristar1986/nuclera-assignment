@@ -4,6 +4,8 @@ import { UsersPage, NewUserModal } from "./PageObjects/UsersPage";
 import { BasePage } from "./PageObjects/BasePage";
 import { ProjectsPage } from "./PageObjects/ProjectsPage";
 import { User, UserRole } from "./DataObjects/User";
+import { Project, ProjectStatus } from "./DataObjects/Project";
+import { Item, ItemStatus } from "./DataObjects/Item";
 
 if (!process.env.ADMIN_PASSWORD) {
     throw new Error("ADMIN_PASSWORD environment variable is not set");
@@ -74,4 +76,20 @@ export async function expectSuccessfulLogin(page: Page, user: User) {
 export async function logout(basePage: BasePage) {
     let projectPage = await gotoProjectsPage(basePage)
     await projectPage.logout()
+}
+
+export async function createProjectWithItem(projectsPage: ProjectsPage, project: Project, item: Item) {
+    await projectsPage.createProject(project);
+    let projectPage = await projectsPage.gotoProject(project);
+    await projectPage.addItemToProject(item);
+    await projectPage.waitForItemInList(item);
+    return projectPage;
+}
+
+export async function createProjectWithMember(projectsPage: ProjectsPage, project: Project, user: User) {
+    await projectsPage.createProject(project);
+    let projectPage = await projectsPage.gotoProject(project);
+    await projectPage.addMemberToProject(user);
+    await projectPage.waitForMemberInList(user);
+    return projectPage;
 }

@@ -2,6 +2,7 @@ import { BasePage } from "./BasePage";
 import { LoginPage } from "./LoginPage";
 import { expect, Locator, Page } from '@playwright/test';
 import { Project, ProjectStatus } from "../DataObjects/Project";
+import { ProjectPage } from "./ProjectPage";
 import { User } from "../DataObjects/User";
 
 type ProjectRowData = {
@@ -26,7 +27,6 @@ export class ProjectsPage extends BasePage {
         this.searchInput = this.page.getByTestId("search-input");
         this.statusFilter = this.page.getByTestId("status-filter");
         this.projectsTable = this.page.getByTestId('projects-list').getByRole('table');
-        // this.page.getByText("") This could just create false positives.
         this.logoutButton = this.page.getByRole('button', { name: 'Logout' });
         this.visibleLocators = [this.heading, this.searchInput, this.statusFilter, this.logoutButton];
     }
@@ -43,29 +43,32 @@ export class ProjectsPage extends BasePage {
     }
 
     async getProjects() {
-        const rowData = await this.projectsTable.getByTestId('project-row').evaluateAll((rows) => {
-            return rows
-                .filter((row) => {
-                    const element = row as HTMLElement;
-                    return element.offsetParent !== null;
-                })
-                .map((row) => {
-                    const cells = row.querySelectorAll('td');
-                    const name = (row.querySelector('[data-testid="project-name"]') as HTMLElement | null)?.innerText?.trim() ?? '';
-                    const status = (row.querySelector('[data-testid="project-status"]') as HTMLSelectElement | null)?.value ?? '';
-                    const itemCount = (row.querySelector('[data-testid="project-item-count"]') as HTMLElement | null)?.innerText?.trim() ?? '0';
-                    const createdAt = (cells[4] as HTMLElement | undefined)?.innerText?.trim() ?? '';
-                    return { name, status, itemCount, createdAt };
-                });
-        });
-
+        const rows  = await this.projectsTable.getByTestId('project-row').all();
         const projects: Project[] = [];
-        for (const row of rowData) {
-            projects.push(await this.getProjectFromNameCell(row));
+        for (const row of rows) {
+            projects.push(await this.getProjectRowData(row));
+        }
+        return projects;
+    }
+
+    async getProjectRowData(row: Locator) {
+        const name = await row.getByTestId('project-name').innerText();
+        const status = await row.getByTestId('project-status').inputValue() as ProjectStatus;
+        const itemCount = await row.getByTestId('project-item-count').innerText();
+        const createdAt = await row.getByRole("cell").nth(4).innerText();
+        return new Project(name, status, createdAt, undefined, parseInt(itemCount, 10))
+    }
+
+    async getProjectFromTable(projectToFind: Project): Promise<Project | undefined> {
+        const matchingRows = this.projectsTable
+            .getByTestId('project-row')
+            .filter({ hasText: this.escapeRegex(projectToFind.name) });
+
+        if ((await matchingRows.count()) === 0) {
+            return undefined;
         }
 
-        console.log(`Current projects in table: ${projects.map(p => p.name).join(', ')}`);
-        return projects;
+        return await this.getProjectRowData(matchingRows.first());
     }
 
     async createProject(project: Project) {
@@ -91,41 +94,12 @@ export class ProjectsPage extends BasePage {
         await expect(this.toast).toContainText(`"${project.name}" deleted`);
     }
 
-    async isProjectInTable(projectToFind: Project) {
-        let projects = await this.getProjects();
-        // expect(projects).toContain(projectToFind); This doesnt work for some reason
-        let found: boolean = false;
-        for (const project of projects) {
-            if (project.name == projectToFind.name) {
-
-                if (projectToFind.isEqualTo(project, true)) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-        return found;
-    }
-
     async waitForProjectToAppear(project: Project) {
-        await this.getProjectNameCell(project.name)
-            .waitFor({ state: 'visible', timeout: 5000 });
-    }
-
-    async waitForProjectInTable(project: Project) {
-        await this.waitForProjectToAppear(project);
-        const projectRow = await this.getProjectFromNameCell(this.getProjectNameCell(project.name));
-        return project.isEqualTo(projectRow, true);
-    }
-
-    async waitForProjectNotInTable(project: Project) {
-        await this.waitForProjectToDisappear(project);
-        return !(await this.getProjectNameCell(project.name).isVisible());
+        await this.projectsTable.getByTestId("project-name").filter({ hasText: project.name }).isVisible();
     }
 
     async waitForProjectToDisappear(project: Project) {
-        await this.getProjectNameCell(project.name)
-            .waitFor({ state: 'hidden', timeout: 5000 });
+        await this.projectsTable.getByTestId("project-name").filter({ hasText: project.name }).isHidden();
     }
 
     async inputSearch(searchTerm: string) {
@@ -136,35 +110,16 @@ export class ProjectsPage extends BasePage {
 
     async getProjectLink(project: Project) {
         await this.waitForProjectToAppear(project);
-        return this.getProjectNameCell(project.name).getAttribute('href');
+        return await this.projectsTable.getByTestId("project-name").filter({ hasText: new RegExp(project.name) }).getAttribute('href');
     }
 
-    private async getProjectFromNameCell(projectNameCellOrRowData: Locator | ProjectRowData) {
-        if (!("locator" in projectNameCellOrRowData)) {
-            return new Project(
-                projectNameCellOrRowData.name,
-                ProjectStatus[projectNameCellOrRowData.status.toLowerCase() as keyof typeof ProjectStatus],
-                projectNameCellOrRowData.createdAt,
-                undefined,
-                parseInt(projectNameCellOrRowData.itemCount, 10)
-            );
-        }
-
-        const projectNameCell = projectNameCellOrRowData;
-        const projectRow = projectNameCell.locator('xpath=ancestor::tr[1]');
-        const cells = await projectRow.getByRole('cell').all();
-        const name = await projectNameCell.innerText();
-        const status = await projectRow.getByTestId("project-status").inputValue();
-        const itemCount = await projectRow.getByTestId("project-item-count").innerText();
-        const createdAt = await cells[4].innerText();
-        return new Project(name, ProjectStatus[status.toLowerCase() as keyof typeof ProjectStatus], createdAt, undefined, parseInt(itemCount, 10));
-    }
-
-    private getProjectNameCell(projectName: string) {
-        return this.projectsTable
-            .getByTestId('project-name')
-            .filter({ hasText: this.escapeRegex(projectName) })
-            .first();
+    async gotoProject(project: Project) {
+        await this.waitForProjectToAppear(project);
+        expect(await this.getProjectLink(project)).toBeTruthy();
+        await this.page.goto(await this.getProjectLink(project) || '');
+        let projectPage =  new ProjectPage(this.page, project);
+        await projectPage.locatorsAreVisible();
+        return projectPage;
     }
 
     private escapeRegex(value: string) {

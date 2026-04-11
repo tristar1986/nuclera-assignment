@@ -52,6 +52,7 @@
     1. Popup dissapears
 1. Multi selector pop up only present when an item is selected.
 1. No Projects.
+1. Check column headers
 
 ### Delete project
 1. Delete project **  ✅
@@ -72,7 +73,7 @@
 1. Prompt on empty fields ✅
 
 ## Project page
-1. Verify name, state, description, item count **
+1. Verify name, state, description, item count ** ✅
 1. Can select and delete multiple items
 1. Select all checks all items
 1. Deselect all unchecks all items
@@ -80,30 +81,41 @@
     1. Popup dissapears
 1. Multi selector pop up only present when an item is selected
 1. Change item status with drop down.
+1. Check column headers
+1. No items
 
 ### Add/edit item modal
-1. Add new item **
+1. Add new item ** ✅
     
-    1. Check status is set correctly
+    1. Check status is set correctly ✅
     1. Check using special characters in name and deescription fields
     1. Resize description box.
-    1. Check appears in list
-1. Cancel does not create a new project **
+    1. Check appears in list ✅
+1. Cancel does not create a new project ** ✅
 
     1. Click outside of model dismisses it
 1. Prompt on empty mandatory fields
-1. Edit item populates fields and status correctly **
+1. Edit item populates fields and status correctly **✅
 
-    1. Item is updated
+    1. Item is updated ✅
+    1. Re-edit shows new values ✅
+1. Item count updated **
+
 
 ### Project members
-1. Project members list shows correct members (check field values) **
+1. Project members list shows correct members (check field values) ** ✅
+
+    1. Empty members
+
+1. Add user to list ** ✅
+1. Remove user from list **  ✅
 
 1. Add user drop down lists all available users not already a member **
 1. User drop down dissapears when no more members can be added
 1. Removing a member removes them from the list and also their ability to see the project
         
     1. Can be readded using dropdown
+1. Add User button disabled when no member selected
 
 ## Synchronise 
 1. Last synced time
@@ -129,3 +141,9 @@
 * Syncronise page
 * Add/edit object modal
 * Checkbox selector
+
+# TODOs:
+* Refractor modal form submission to use base code.
+* Use better paths than xpaths for some locators.
+* Generic modal cancel flow.
+* Generic table collation

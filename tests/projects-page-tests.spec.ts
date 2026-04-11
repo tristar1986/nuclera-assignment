@@ -21,13 +21,15 @@ test.describe("Projects Page Tests", () => {
         let projectsPage = await loginAsAdmin(page);
         let usersPage = await gotoUsersPage(projectsPage);
         await usersPage.createUser(adminUser);
-        await logout(usersPage); 
+        await logout(usersPage);
     });
 
     test("admin can create projects", async ({ page }) => {
         let projectsPage = await login(page, adminUser);
         await projectsPage.createProject(newProject);
-        expect(await projectsPage.waitForProjectInTable(newProject)).toBe(true);
+        await projectsPage.waitForProjectToAppear(newProject);
+        let foundProject = await projectsPage.getProjectFromTable(newProject);
+        compareProjects(newProject, foundProject!);
     });
 
     test("all projects are visible with no search options selected", async ({ page }) => {
@@ -42,10 +44,9 @@ test.describe("Projects Page Tests", () => {
         console.log("Check default search options");
         expect(await projectsPage.searchInput.inputValue()).toBe("");
         expect(await projectsPage.statusFilter.inputValue()).toBe("all");
-
-        expect(await projectsPage.waitForProjectInTable(project1)).toBe(true);
-        expect(await projectsPage.waitForProjectInTable(project2)).toBe(true);
-        expect(await projectsPage.waitForProjectInTable(project3)).toBe(true);
+        await projectsPage.waitForProjectToAppear(project1);
+        await projectsPage.waitForProjectToAppear(project2);
+        await projectsPage.waitForProjectToAppear(project3);
     });
 
     test("projects can be searched by name", async ({ page }) => {
@@ -56,15 +57,14 @@ test.describe("Projects Page Tests", () => {
         await projectsPage.createProject(project2);
 
         await projectsPage.inputSearch(project1.name);
-        expect(await projectsPage.waitForProjectInTable(project1)).toBe(true);
-        expect(await projectsPage.waitForProjectNotInTable(project2)).toBe(true);
+        await projectsPage.waitForProjectToAppear(project1);
+        await projectsPage.waitForProjectToDisappear(project2);
 
         console.log("clear search returns all projects");
         await projectsPage.searchInput.clear();
 
-        // cant check for all projects here as other tests may have created projects that are still present, but can check that the two created in this test are visible
-        expect(await projectsPage.waitForProjectInTable(project1)).toBe(true);
-        expect(await projectsPage.waitForProjectInTable(project2)).toBe(true);
+        await projectsPage.waitForProjectToAppear(project1);
+        await projectsPage.waitForProjectToAppear(project2);
     });
 
     test("projects can be filtered by status", async ({ page }) => {
@@ -78,23 +78,20 @@ test.describe("Projects Page Tests", () => {
 
         await projectsPage.statusFilter.selectOption(ProjectStatus.active);
         await projectsPage.locatorsAreVisible();
-        expect(await projectsPage.waitForProjectInTable(project1)).toBe(true);
-        expect(await projectsPage.waitForProjectNotInTable(project2)).toBe(true);
-        expect(await projectsPage.waitForProjectNotInTable(project3)).toBe(true);
-
+        await projectsPage.waitForProjectToAppear(project1);
+        await projectsPage.waitForProjectToDisappear(project2);
+        await projectsPage.waitForProjectToDisappear(project3);
     });
 
-    test("projects can be filters by description", async ({ page }) => {
+    test("projects can be filtered by description", async ({ page }) => {
         let projectsPage = await login(page, adminUser);        
-        let searchTerm1 = generate_random_string();
-        let searchTerm2 = generate_random_string();
         await projectsPage.createProject(newProject);
 
         await projectsPage.inputSearch(newProject.description);
-        expect(await projectsPage.waitForProjectInTable(newProject)).toBe(true);
+        `await projectsPage.waitForProjectToAppear(newProject);`
 
         await projectsPage.inputSearch(generate_random_string());
-        expect(await projectsPage.waitForProjectNotInTable(newProject)).toBe(true);
+        await projectsPage.waitForProjectToDisappear(newProject);
     });
 
     test("projects can be searched by individual words in description", async ({ page }) => {
@@ -102,7 +99,10 @@ test.describe("Projects Page Tests", () => {
         await projectsPage.createProject(newProject);
         
         await projectsPage.inputSearch(searchTerm1);
-        expect(await projectsPage.waitForProjectInTable(newProject)).toBe(true);
+        await projectsPage.waitForProjectToAppear(newProject);
+
+        await projectsPage.inputSearch(searchTerm2);
+        await projectsPage.waitForProjectToAppear(newProject);
     });
 
     test("projects cannot be searched by multiple words in description", async ({ page }) => {
@@ -112,7 +112,7 @@ test.describe("Projects Page Tests", () => {
         await projectsPage.createProject(newProject);
         
         await projectsPage.inputSearch(`${searchTerm1} ${searchTerm2}`);
-        expect(await projectsPage.waitForProjectNotInTable(newProject)).toBe(true);
+        await projectsPage.waitForProjectToDisappear(newProject);
     });
 
     test("projects can be deleted", async ({ page }) => {
@@ -121,7 +121,8 @@ test.describe("Projects Page Tests", () => {
         let projectLink = await projectsPage.getProjectLink(newProject);
         expect(projectLink).toBeTruthy();
         await projectsPage.deleteProject(newProject);
-        expect(await projectsPage.isProjectInTable(newProject)).toBe(false);
+        let foundProject = await projectsPage.getProjectFromTable(newProject);
+        expect(foundProject).toBeUndefined();
         // This will always be true given the above assertion
         if (projectLink) {
             await page.goto(projectLink);
@@ -139,7 +140,8 @@ test.describe("Projects Page Tests", () => {
         await newProjectModal.cancelButton.click();
         await newProjectModal.modal.waitFor({ state: 'hidden', timeout: newProjectModal.modalHiddenTimeout });
         await projectsPage.locatorsAreVisible();
-        expect(await projectsPage.isProjectInTable(newProject)).toBe(false);
+        let foundProject = await projectsPage.getProjectFromTable(newProject);
+        expect(foundProject).toBeUndefined();
     });
 
     test("unfocus project modal cancels creation", async ({ page }) => {
@@ -151,7 +153,8 @@ test.describe("Projects Page Tests", () => {
         await page.mouse.click(0, 0);
         await newProjectModal.modal.waitFor({ state: 'hidden', timeout: newProjectModal.modalHiddenTimeout });
         await projectsPage.locatorsAreVisible();
-        expect(await projectsPage.isProjectInTable(newProject)).toBe(false);
+        let foundProject = await projectsPage.getProjectFromTable(newProject);
+        expect(foundProject).toBeUndefined();
     });
 
     test("name field is mandatory on project creation", async ({ page }) => {
@@ -170,6 +173,15 @@ test.describe("Projects Page Tests", () => {
         newProject.description = "";
         let projectsPage = await login(page, adminUser);
         await projectsPage.createProject(newProject);
-        expect(await projectsPage.isProjectInTable(newProject)).toBe(true);
+        let foundProject = await projectsPage.getProjectFromTable(newProject);
+        expect(foundProject).toBeTruthy();
+        compareProjects(newProject, foundProject!);
     });
 });
+
+function compareProjects(expectedProject: Project, actualProject: Project) {
+    expect(actualProject).toBeDefined();
+    expect(actualProject?.name).toBe(expectedProject.name);
+    expect(actualProject?.status.toLowerCase()).toBe(expectedProject.status.toLowerCase());
+    expect(actualProject?.itemCount).toBe(expectedProject.itemCount);
+}

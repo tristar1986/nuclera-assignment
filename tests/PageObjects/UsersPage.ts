@@ -35,13 +35,11 @@ export class UsersPage extends BasePage {
     }
 
     async getUsers() {
-        const rows = await this.userTable.getByRole('row').all()
+        const rows = await this.userTable.getByTestId('user-row').all()
         const users: User[] = [];
         for (const row of rows) {
-            const cells = await row.getByRole('cell').all();
-            if (cells.length === 0) continue;
-            const username = await cells[0].innerText();
-            const role = await cells[1].innerText();
+            const username = await row.getByTestId('user-username').innerText();
+            const role = await row.getByTestId('user-role').innerText();
             users.push(new User(username, '', UserRole[role as keyof typeof UserRole]));
         }
         console.log(`Current users in table: ${users.map(u => u.username).join(', ')}`);
