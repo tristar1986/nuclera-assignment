@@ -1,9 +1,7 @@
-import { urlToHttpOptions } from "url";
 import { Project } from "../DataObjects/Project"
 import { BasePage } from "./BasePage";
 import { expect, Locator, Page } from "@playwright/test";
 import { Item, ItemStatus } from "../DataObjects/Item";
-import { create } from "domain";
 import { User, UserRole } from "../DataObjects/User";
 
 export class ProjectPage extends BasePage {
