@@ -1,149 +1,138 @@
-# Test plan
+# Test Plan
+
+Status key:
+- [x]: implemented / covered
+- [ ]: planned/not yet automated
+- [~]: deferred/manual or low ROI for automation
+
+Priority key:
+- [High]
+- [Normal]
+
 ## Login Page
-1. Registered user with correct password can login and ends on project page ** ✅ 
+- [x] [High] Valid login redirects registered user to projects page
+    - [x] [High] Username case mismatch
+    - [x] [High] Special characters (Unicode/control)
+    - [x] [High] Whitespace handling
+- [x] [High] Incorrect password shows error and blocks login
+- [x] [High] Empty fields show validation prompts
+- [x] [Normal] Root URL redirects to login
+- [x] [Normal] Password field is obfuscated
+- [x] [High] Logout redirects to login and protects project page
 
-    1. Mismatch of case ✅ 
-    1. Special Characters (unicode or control characters) ✅ 
-    1. Whitespace ✅ 
-1. Incorrect password errors and fails to login, check for: ** ✅ 
-1. Prompt on empty fields ** ✅ 
-1. Root redirects to login ✅ 
-1. Password is obfuscated ✅ 
-1. Logout ** ✅ 
+## User Page
 
-    1. Check project page is in accessible (redirects to login) ✅ 
+### New User Modal
+- [x] [High] Create regular user
+- [x] [Normal] Create regular user with complex password
+- [x] [High] Prevent duplicate username creation (including case variant)
+- [x] [High] Role list includes only regular/admin
+- [x] [Normal] Empty fields show validation prompts
+- [x] [High] Cancel does not create user
+    - [x] [High] Click outside modal dismisses it
+- [x] [High] Create admin user
+- [x] [High] Delete regular user
+    - [~] [Normal] Existing session behavior after deletion (auth timeout); low ROI for automation
+- [x] [High] Delete admin user
+- [x] [High] User cannot delete self
+- [x] [Normal] Toast behavior
+    - [x] [Normal] Dismisses on cancel
+    - [x] [Normal] Auto-dismisses after timeout
 
-## User page
-### New user modal
-1. Add new regular user ** ✅ 
-1. Add new regular user complex password ✅ 
-1. Add new user with same username (case?) ** ✅ 
-1. Check role list is only regular/admin ** ✅ 
-1. Prompt on empty fields ✅ 
-1. Cancel does not create a new user ** ✅ 
+## Projects Page
 
-    1. Click outside of model dismisses it ✅ 
-1. Add admin user ** ✅ 
-1. Delete regular user (should no longer be able to login.) ** ✅ 
+### Filter Projects
+- [x] [High] No filter shows all visible projects
+    - [x] [High] Validate project field values
+- [x] [High] Status filter returns only matching projects
+- [x] [High] Search filters by name/description
+    - [ ] [High] Case-insensitive matching
+    - [x] [High] Multiple search terms
+- [x] [High] Clear filters restores valid full list
+- [ ] [Normal] Change project status via dropdown
+- [ ] [Normal] Select all checks all rows
+- [ ] [Normal] Deselect all unchecks all rows
+    - [ ] [Normal] Multi-select popup disappears
+- [ ] [Normal] Multi-select popup appears only when a row is selected
+- [ ] [Normal] Empty-projects state
+- [ ] [Normal] Column headers
 
-    1. What happens if user is in an existing session, auth timeout? Probably not worth auto test.
-1. Delete admin user ** ✅ 
-1. Should not be able to delete yourself ** ✅ 
-1. Test toasts ✅ 
+### Delete Project
+- [x] [High] Delete project
+    - [x] [High] Removed from list
+    - [x] [High] Direct URL is no longer accessible
+    - [ ] [High] Hidden from previous members
 
-    1. Dissapear when cancelled ✅ 
-    1. Dissapear after timeout ✅ 
+### New Project Modal
+- [x] [High] Create project
+    - [x] [High] State is set correctly
+    - [ ] [High] Special characters in name/description
+    - [ ] [High] Description box resizing
+- [x] [Normal] Cancel does not create project
+    - [x] [Normal] Click outside modal dismisses it
+- [x] [Normal] Empty fields show validation prompts
 
-## Projects page
-### Filter projects
-1. No filter lists all projects you are a member of or all if you are admin. ** ✅ 
+## Project Page
+- [x] [High] Validate name, state, description, and item count
+- [ ] [Normal] Select and delete multiple items
+- [ ] [Normal] Select all checks all items
+- [ ] [Normal] Deselect all unchecks all items
+    - [ ] [Normal] Multi-select popup disappears
+- [ ] [Normal] Multi-select popup appears only when an item is selected
+- [ ] [Normal] Change item status via dropdown
+- [ ] [Normal] Column headers
+- [ ] [Normal] Empty-items state
 
-    1. Check project field values ✅ 
-1. Each status filters only projects in that state ** ✅ 
-1. Search filters on words in the name or project description ** ✅ 
+### Add/Edit Item Modal
+- [x] [High] Add new item
+    - [x] [High] Status is set correctly
+    - [ ] [High] Special characters in name/description
+    - [ ] [High] Description box resizing
+    - [x] [High] Item appears in list
+- [x] [High] Cancel does not create project/item
+    - [ ] [High] Click outside modal dismisses it
+- [ ] [Normal] Empty mandatory fields show prompts
+- [x] [High] Edit item pre-populates fields and status correctly
+    - [x] [High] Item updates correctly
+    - [x] [High] Re-open shows updated values
+- [ ] [High] Item count updates
 
-    1. Case insenstive
-    1. Multiple search terms ✅ 
-1. Clear filter returns all valid projects ** ✅
-1. Change project status with drop down
-1. Select all checks all items
-1. Deselect all unchecks all items
+### Project Members
+- [x] [High] Members list shows correct members and field values
+    - [ ] [High] Empty-members state
+- [x] [High] Add user to members list
+- [x] [High] Remove user from members list
+- [ ] [High] Add-user dropdown shows only users not already in the project
+- [ ] [Normal] Add-user dropdown disappears when no users remain
+- [ ] [Normal] Removing member revokes project visibility
+    - [ ] [Normal] User can be re-added from dropdown
+- [ ] [Normal] Add User button disabled when no member is selected
 
-    1. Popup dissapears
-1. Multi selector pop up only present when an item is selected.
-1. No Projects.
-1. Check column headers
+## Synchronise
+- [~] [Normal] Last synced time is shown
+- [~] [Normal] Start sync triggers sync process
+    - [~] [Normal] Sync shows progress and completes
+    - [~] [Normal] Last synced time updates
+    - [~] [Normal] Known issue: first sync currently fails
+- [~] [Normal] Last synced time persists after revisit
+- [~] [Normal] Navigate away during active sync
 
-### Delete project
-1. Delete project **  ✅
+## Permissions
+- [ ] [High] Validate page permissions for regular users
+    - [ ] [High] Users page access
+    - [ ] [High] Non-member project page access
+    - [ ] [High] Delete project permission
 
-    1. Removed from project list ✅
-    1. Direct link no longer works/shows appropriate error page. ✅
-    1. Does not show up for previous members of the deleted project
+## Page Objects / Structures
+- Login page
+- Project list page
+- Users page
+- Synchronise page
+- Add/edit object modal
+- Checkbox selector
 
-### New project modal
-1. Add new project ** ✅
-
-    1. Check state is set correctly ✅
-    1. Check using special characters in name and deescription fields
-    1. Resize description box
-1. Cancel does not create a new project ✅
-
-    1. Click outside of model dismisses it ✅
-1. Prompt on empty fields ✅
-
-## Project page
-1. Verify name, state, description, item count ** ✅
-1. Can select and delete multiple items
-1. Select all checks all items
-1. Deselect all unchecks all items
-
-    1. Popup dissapears
-1. Multi selector pop up only present when an item is selected
-1. Change item status with drop down.
-1. Check column headers
-1. No items
-
-### Add/edit item modal
-1. Add new item ** ✅
-    
-    1. Check status is set correctly ✅
-    1. Check using special characters in name and deescription fields
-    1. Resize description box.
-    1. Check appears in list ✅
-1. Cancel does not create a new project ** ✅
-
-    1. Click outside of model dismisses it
-1. Prompt on empty mandatory fields
-1. Edit item populates fields and status correctly **✅
-
-    1. Item is updated ✅
-    1. Re-edit shows new values ✅
-1. Item count updated **
-
-
-### Project members
-1. Project members list shows correct members (check field values) ** ✅
-
-    1. Empty members
-
-1. Add user to list ** ✅
-1. Remove user from list **  ✅
-
-1. Add user drop down lists all available users not already a member **
-1. User drop down dissapears when no more members can be added
-1. Removing a member removes them from the list and also their ability to see the project
-        
-    1. Can be readded using dropdown
-1. Add User button disabled when no member selected
-
-## Synchronise 
-1. Last synced time
-1. Start syncing starts the sync process
-
-    1. Sync progress and completes
-    1. Last synced time updates
-    1. Workaround first sync always fails
-1. Revisit sync time stays
-1. Navigate away mid sync
-
-## Permissions 
-1. Check page permisisons of user **
-
-    1. User page
-    1. Project pages you are not a member of
-    1. Delete project
-
-# Page objects/structures
-* Login page
-* Project list page
-* Users page
-* Syncronise page
-* Add/edit object modal
-* Checkbox selector
-
-# TODOs:
-* Refractor modal form submission to use base code.
-* Use better paths than xpaths for some locators.
-* Generic modal cancel flow.
-* Generic table collation
+## TODOs
+- Refactor modal form submission to use shared base code
+- Replace fragile XPath locators with stable selectors
+- Create generic modal cancel flow
+- Create generic table collation helpers
