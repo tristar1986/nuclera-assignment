@@ -136,3 +136,4 @@ Priority key:
 - Replace fragile XPath locators with stable selectors
 - Create generic modal cancel flow
 - Create generic table collation helpers
+- Speed up github action to more in parallel
