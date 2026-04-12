@@ -118,10 +118,10 @@ Priority key:
 - [~] [Normal] Navigate away during active sync
 
 ## Permissions
-- [ ] [High] Validate page permissions for regular users
-    - [ ] [High] Users page access
-    - [ ] [High] Non-member project page access
-    - [ ] [High] Delete project permission
+- [x] [High] Validate page permissions for regular users
+    - [x] [High] Users page access
+    - [x] [High] Non-member project page access
+    - [x] [High] Delete project permission
 
 ## Page Objects / Structures
 - Login page

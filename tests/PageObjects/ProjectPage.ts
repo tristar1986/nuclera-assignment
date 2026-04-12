@@ -3,6 +3,7 @@ import { BasePage } from "./BasePage";
 import { expect, Locator, Page } from "@playwright/test";
 import { Item, ItemStatus } from "../DataObjects/Item";
 import { User, UserRole } from "../DataObjects/User";
+import { ProjectsPage } from "./ProjectsPage";
 
 export class ProjectPage extends BasePage {
     page: Page;
@@ -92,11 +93,11 @@ export class ProjectPage extends BasePage {
     }
 
     async waitForItemInList(item: Item) {
-        return await expect(this.itemTable.getByTestId("item-row").filter({ hasText: new RegExp(item.name) }).first()).toBeVisible();
+        await expect(this.itemTable.getByTestId("item-row").filter({ hasText: new RegExp(item.name) }).first()).toBeVisible();
     }
 
     async waitForItemNotInList(item: Item) {
-        return await expect(this.itemTable.getByTestId("item-row").filter({ hasText: new RegExp(item.name) })).toHaveCount(0);
+        await expect(this.itemTable.getByTestId("item-row").filter({ hasText: new RegExp(item.name) })).toHaveCount(0);
     }
 
     async clickEditItem(item: Item) {

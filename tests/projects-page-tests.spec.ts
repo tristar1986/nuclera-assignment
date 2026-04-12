@@ -58,7 +58,7 @@ test.describe("Projects Page Tests", () => {
 
         await projectsPage.inputSearch(project1.name);
         await projectsPage.waitForProjectToAppear(project1);
-        await projectsPage.waitForProjectToDisappear(project2);
+        await projectsPage.waitForProjectNotInList(project2);
 
         console.log("clear search returns all projects");
         await projectsPage.searchInput.clear();
@@ -79,8 +79,8 @@ test.describe("Projects Page Tests", () => {
         await projectsPage.statusFilter.selectOption(ProjectStatus.active);
         await projectsPage.locatorsAreVisible();
         await projectsPage.waitForProjectToAppear(project1);
-        await projectsPage.waitForProjectToDisappear(project2);
-        await projectsPage.waitForProjectToDisappear(project3);
+        await projectsPage.waitForProjectNotInList(project2);
+        await projectsPage.waitForProjectNotInList(project3);
     });
 
     test("projects can be filtered by description", async ({ page }) => {
@@ -91,7 +91,7 @@ test.describe("Projects Page Tests", () => {
         `await projectsPage.waitForProjectToAppear(newProject);`
 
         await projectsPage.inputSearch(generate_random_string());
-        await projectsPage.waitForProjectToDisappear(newProject);
+        await projectsPage.waitForProjectNotInList(newProject);
     });
 
     test("projects can be searched by individual words in description", async ({ page }) => {
@@ -112,7 +112,7 @@ test.describe("Projects Page Tests", () => {
         await projectsPage.createProject(newProject);
         
         await projectsPage.inputSearch(`${searchTerm1} ${searchTerm2}`);
-        await projectsPage.waitForProjectToDisappear(newProject);
+        await projectsPage.waitForProjectNotInList(newProject);
     });
 
     test("projects can be deleted", async ({ page }) => {

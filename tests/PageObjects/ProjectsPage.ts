@@ -5,13 +5,6 @@ import { Project, ProjectStatus } from "../DataObjects/Project";
 import { ProjectPage } from "./ProjectPage";
 import { User } from "../DataObjects/User";
 
-type ProjectRowData = {
-    name: string;
-    status: string;
-    itemCount: string;
-    createdAt: string;
-};
-
 export class ProjectsPage extends BasePage {
     heading: Locator;
     newProjectButton: Locator;
@@ -84,7 +77,7 @@ export class ProjectsPage extends BasePage {
 
     async deleteProject(project: Project) {
         console.log(`Deleting project with name: ${project.name}`);
-        await this.projectsTable.getByRole('row').filter({ hasText: this.escapeRegex(project.name) }).getByRole('button', { name: 'Delete' }).click();
+        await (await this.getProjectDeletionButton(project)).click();
         const deleteProjectModal = new DeleteProjectModal(this.page, project);
         await deleteProjectModal.locatorsAreVisible();
         await deleteProjectModal.deleteProject();
@@ -95,11 +88,11 @@ export class ProjectsPage extends BasePage {
     }
 
     async waitForProjectToAppear(project: Project) {
-        await this.projectsTable.getByTestId("project-name").filter({ hasText: project.name }).isVisible();
+        await expect(this.projectsTable.getByTestId("project-name").filter({ hasText: project.name })).toBeVisible();
     }
 
-    async waitForProjectToDisappear(project: Project) {
-        await this.projectsTable.getByTestId("project-name").filter({ hasText: project.name }).isHidden();
+    async waitForProjectNotInList(project: Project) {
+        await expect(this.projectsTable.getByTestId("project-name").filter({ hasText: project.name })).toHaveCount(0);
     }
 
     async inputSearch(searchTerm: string) {
@@ -120,6 +113,10 @@ export class ProjectsPage extends BasePage {
         let projectPage =  new ProjectPage(this.page, project);
         await projectPage.locatorsAreVisible();
         return projectPage;
+    }
+
+    async getProjectDeletionButton(project: Project) {
+        return await this.projectsTable.getByRole('row').filter({ hasText: new RegExp(project.name) }).getByRole('button', { name: 'Delete' });
     }
 
     private escapeRegex(value: string) {

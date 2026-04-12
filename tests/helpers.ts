@@ -6,6 +6,7 @@ import { ProjectsPage } from "./PageObjects/ProjectsPage";
 import { User, UserRole } from "./DataObjects/User";
 import { Project, ProjectStatus } from "./DataObjects/Project";
 import { Item, ItemStatus } from "./DataObjects/Item";
+import { ProjectPage } from "./PageObjects/ProjectPage";
 
 if (!process.env.ADMIN_PASSWORD) {
     throw new Error("ADMIN_PASSWORD environment variable is not set");
@@ -23,31 +24,31 @@ export function generate_random_string(length: number = 10): string {
     return result;
 }
 
-export async function login(page: Page, user: User) {
+export async function login(page: Page, user: User): Promise<ProjectsPage> {
     let loginPage = await (new LoginPage(page)).goto();
     await loginPage.locatorsAreVisible();
     return await loginPage.signIn(user);
 }
 
-export async function loginAsAdmin(page: Page) {
+export async function loginAsAdmin(page: Page): Promise<ProjectsPage> {
     return await login(page, originalAdminUser);
 }
 
-export async function gotoUsersPage(basePage: BasePage) {
+export async function gotoUsersPage(basePage: BasePage): Promise<UsersPage> {
     await basePage.usersLink.click();
     let usersPage = new UsersPage(basePage.page);
     await usersPage.locatorsAreVisible();
     return usersPage;
 }
 
-export async function gotoProjectsPage(basePage: BasePage) {
+export async function gotoProjectsPage(basePage: BasePage): Promise<ProjectsPage> {
     await basePage.projectsLink.click();
     let projectsPage = new ProjectsPage(basePage.page);
     await projectsPage.locatorsAreVisible();
     return projectsPage;
 }
 
-export async function loginAsAdminAndCreateUser(page: Page, user: User) {
+export async function loginAsAdminAndCreateUser(page: Page, user: User): Promise<UsersPage> {
     let usersPage = await gotoUsersPage((await loginAsAdmin(page)));
     await usersPage.createUser(user);
     return usersPage;
@@ -92,4 +93,11 @@ export async function createProjectWithMember(projectsPage: ProjectsPage, projec
     await projectPage.addMemberToProject(user);
     await projectPage.waitForMemberInList(user);
     return projectPage;
+}
+
+export async function goBackToProjects(projectPage: ProjectPage) {
+    await projectPage.backToProjectsLink.click();
+    let projectsPage = new ProjectsPage(projectPage.page);
+    await projectsPage.locatorsAreVisible();
+    return projectsPage;
 }

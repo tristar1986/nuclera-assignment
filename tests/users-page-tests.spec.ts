@@ -114,17 +114,4 @@ test.describe("Users Page Tests", () => {
         usersPage = await gotoUsersPage(projectsPage);
         expect(await usersPage.isDeleteUserDisabled(adminUser)).toBe(true);
     });
-
-    // Clean up to be moved to be moved to very end of test run.
-    // test.afterEach(async ({ page }) => {
-    //     // Ensure any users created in these tests are deleted to not impact other tests
-    //     let projectPage = await loginAsAdmin(page);
-    //     let usersPage = await gotoUsersPage(projectPage);
-    //     let users = await usersPage.getUsers();
-    //     for (let user of users) {
-    //         if (user.username !== "admin") {
-    //             await usersPage.deleteUser(user);
-    //         }
-    //     }
-    // }); 
 });
